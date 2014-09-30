@@ -8,9 +8,30 @@ var Course = React.createClass({
         return (
             <div className="course">
                 <h3 className="courseDetails">
-                    {this.props.title} {this.props.code}
+                    {this.props.title} ({this.props.code})
                 </h3>
             </div>
+        );
+    }
+});
+
+var CourseSearchForm = React.createClass({
+    handleSubmit: function(e) {
+        e.preventDefault();
+        var searchString = this.refs.searchString.getDOMNode().value.trim();
+        if (!searchString) {
+            return;
+        }
+        this.props.onCourseSubmit({searchString: searchString});
+        this.refs.searchString.getDOMNode().value = '';
+        return;
+    },
+    render: function() {
+        return (
+            <form className="courseSerachForm" onSubmit={this.handleSubmit}>
+                <input type="text" placeholder="Course Title or Code" ref="searchString" />
+                <input type="submit" value="Search" />
+            </form>
         );
     }
 });
@@ -49,7 +70,6 @@ var CourseBox = React.createClass({
         var courses = this.state.data;
         courses.push(course);
         this.setState({data: courses}, function() {
-
             $.ajax({
                 url: this.props.url,
                 dataType: 'json',
@@ -73,7 +93,8 @@ var CourseBox = React.createClass({
     render: function() {
         return (
             <div className="courseBox">
-                <h1>Courses</h1>
+                <h2>Courses</h2>
+                <CourseSearchForm onCourseSubmit={this.handleCourseSearch} />
                 <CourseList data={this.state.data} />
             </div>
         );

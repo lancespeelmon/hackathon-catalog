@@ -49,28 +49,29 @@ app.get('/courses.json', function (request, response) {
 });
 
 app.post('/courses.json', function (request, response) {
-
     onConnect(function (err, connection) {
-        r.db(dbConfig.db).table('courses').insert({author: request.body.author, text: request.body.text}).run(connection, function(err, result) {
-            if (err) throw err;
-            console.log(JSON.stringify(request.body, null, 2));
+        r.db(dbConfig.db).table('courses').filter(function(doc){
+            var s = "^" + request.body.searchString;
+            return doc('code').match(s)
+        }).run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+                //console.log(result);
+
+                if (err) {
+                    console.log("[ERROR][%s][GET courses] %s:%s\n%s", connection['_id'], err.name, err.msg, err.message);
+                }
+                else {
+                    cursor.toArray(function (err, result) {
+                        if (err) throw err;
+                        courses = result;
+
+                        response.setHeader('Content-Type', 'application/json');
+
+                        response.send(JSON.stringify(courses));
+                    });
+                }
         })
-
-        r.db(dbConfig.db).table('courses').run(connection, function (err, cursor) {
-            if (err) {
-                console.log("[ERROR][%s][GET courses] %s:%s\n%s", connection['_id'], err.name, err.msg, err.message);
-            }
-            else {
-                cursor.toArray(function (err, result) {
-                    if (err) throw err;
-                    courses = result;
-
-                    response.setHeader('Content-Type', 'application/json');
-
-                    response.send(JSON.stringify(courses));
-                });
-            }
-        });
     });
 });
 
