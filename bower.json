@@ -1,0 +1,19 @@
+{
+  "name": "hackathon-catalog",
+  "version": "0.0.1",
+  "homepage": "https://github.com/KualiCo/hackathon-catalog",
+  "authors": [
+    "sudduth@uw.edu"
+  ],
+  "license": "Undefined",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "foundation": "zurb/bower-foundation#~5.4.5"
+  }
+}

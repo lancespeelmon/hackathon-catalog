@@ -1,5 +1,7 @@
 /** @jsx React.DOM */
 
+var React = require('react')
+
 /*
  * The details of a Course.
  */
@@ -28,8 +30,8 @@ var CourseSearchForm = React.createClass({
     },
     render: function() {
         return (
-            <form className="courseSerachForm" onSubmit={this.handleSubmit}>
-                <input type="text" placeholder="Course Title or Code" ref="searchString" />
+            <form className="courseSearchForm" onSubmit={this.handleSubmit}>
+                <input type="text" placeholder="Search..." ref="searchString" />
                 <input type="submit" value="Search" />
             </form>
         );
@@ -71,7 +73,7 @@ var CourseBox = React.createClass({
         courses.push(course);
         this.setState({data: courses}, function() {
             $.ajax({
-                url: this.props.url,
+                url: this.props.url + "?code=" + course,
                 dataType: 'json',
                 type: 'POST',
                 data: course,
@@ -101,7 +103,12 @@ var CourseBox = React.createClass({
     }
 });
 
-React.renderComponent(
-    <CourseBox url="courses.json" />,
-    document.getElementById('content')
-);
+var React = require('react')
+
+module.exports = React.createClass({
+    render: function() {
+        return (
+            <CourseBox url="courses" />
+        );
+    }
+});

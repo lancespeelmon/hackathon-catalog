@@ -11,6 +11,6 @@
     </head>
     <body>
         <div id="content"></div>
-        <script type="text/jsx" src="scripts/curriculum.js"></script>
+        <script type="text/jsx" src="client/requests/curriculum.jsx"></script>
     </body>
 </html>
