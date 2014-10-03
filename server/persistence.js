@@ -24,12 +24,21 @@ onConnect(function(err, conn) {
     connection = conn;
 })
 
+/**
+ * Boiler plate code for creating boilerplate data access objects.
+ * @param t The name of the table.
+ */
 var DataAccess = function (t) {
     // TODO: validate object structure for all functions accepting courses as args.  Need a callback for that.
 
     var table = t
 
     return {
+        /**
+         * Gets an entity by its id.
+         * @param id
+         * @returns {Promise} which contains the entity if it exists.
+         */
         "get": function(id) {
             return new Promise(function(resolve, reject) {
                 r.table(table).filter(r.row('id').eq(id)).run(connection, function(err, cursor) {
@@ -48,8 +57,16 @@ var DataAccess = function (t) {
                 });
             });
         },
-
-        "getSome" : function(searchParams) {
+        /**
+         * Gets a list of entities which match the given search params.
+         * TODO: Maybe update to accommodate an operator which determines how the filter should be applied for each param
+         * (e.g. startsWith, endsWith, containts).
+         *
+         * @param searchParams A map where the key is the property name of the entity and the value is the value is the
+         * value to filter by.
+         * @returns {Promise} which contains the search results.
+         */
+        "getSome": function(searchParams) {
             return new Promise(function(resolve, reject) {
                 //  Dynamically build a search from query params
                 //  FIXME: This opens a security hole big as Dallas. Should probably limit
@@ -60,7 +77,7 @@ var DataAccess = function (t) {
                         return course(key).match(searchParams[key]);
                     });
                 }
-                query = query.orderBy('title'); // ... and furthermore.
+                query = query.orderBy('title'); // Just reminding myself that I could do this if I wanted to.
                 query.run(connection, function(err, cursor) {
                     if (err) {
                         console.log("[ERROR][%s][GET courses] %s:%s\n%s", connection['_id'], err.name, err.msg, err.message);
@@ -71,10 +88,13 @@ var DataAccess = function (t) {
                             resolve(result);
                         });
                     }
-                }
-            );
+                });
+            });
         },
-        "getAll" : function() {
+        /**
+         * Gets a rows in the table.
+         */
+        "getAll": function() {
             return new Promise(function(resolve, reject) {
                 r.table(table).run(connection, function(err, cursor) {
                     if (err) reject(err);
@@ -85,8 +105,7 @@ var DataAccess = function (t) {
                 });
             });
         },
-
-        "update" : function(course) {
+        "update": function(course) {
             return new Promise(function(resolve, reject) {
                 // what happens if there is no course with the given ID?
                 r.table(table).get(course.id).replace(course).run(connection, function(err, result) {
@@ -100,7 +119,10 @@ var DataAccess = function (t) {
                 });
             });
         },
-
+        /**
+         * Deletes an entity.
+         * @param id of the entity to delete.
+         */
         "delete" : function(id) {
             return new Promise(function(resolve, reject) {
                 // what happens if there is no course with the given ID?
@@ -116,7 +138,6 @@ var DataAccess = function (t) {
             });
         }
     }
-
 };
 
 exports.Course = DataAccess('courses');
