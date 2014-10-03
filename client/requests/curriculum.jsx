@@ -57,23 +57,11 @@ var CourseList = React.createClass({
 
 /* Container for a list of Courses */
 var CourseBox = React.createClass({
-    loadCoursesFromServer: function() {
-        $.ajax({
-            url: this.props.url,
-            dataType: 'json',
-            success: function(data) {
-                this.setState({data: data});
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
-    },
-    handleCourseSearch: function(course) {
+    handleCourseSearch: function(codeSearchString) {
         var courses = this.state.data;
         this.setState({data: courses}, function() {
             $.ajax({
-                url: this.props.url + "?code=" + course,
+                url: this.props.url + "?code=" + codeSearchString,
                 dataType: 'json',
                 type: 'GET',
                 data: courses,
@@ -89,10 +77,10 @@ var CourseBox = React.createClass({
     getInitialState: function() {
         return {data: []};
     },
-    componentDidMount: function() {
+    //componentDidMount: function() {
         // Leaving this because I don't want to forget about it.
         //this.loadCoursesFromServer();
-    },
+    //},
     render: function() {
         return (
             <div className="courseBox">
