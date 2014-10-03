@@ -24,7 +24,8 @@ var CourseSearchForm = React.createClass({
         if (!searchString) {
             return;
         }
-        this.props.onCourseSubmit({searchString: searchString});
+        //this.props.onCourseSubmit({searchString: searchString});
+        this.props.onCourseSubmit(searchString);
         this.refs.searchString.getDOMNode().value = '';
         return;
     },
@@ -70,13 +71,12 @@ var CourseBox = React.createClass({
     },
     handleCourseSearch: function(course) {
         var courses = this.state.data;
-        courses.push(course);
         this.setState({data: courses}, function() {
             $.ajax({
                 url: this.props.url + "?code=" + course,
                 dataType: 'json',
-                type: 'POST',
-                data: course,
+                type: 'GET',
+                data: courses,
                 success: function(data) {
                     this.setState({data: data});
                 }.bind(this),
@@ -90,7 +90,8 @@ var CourseBox = React.createClass({
         return {data: []};
     },
     componentDidMount: function() {
-        this.loadCoursesFromServer();
+        // Leaving this because I don't want to forget about it.
+        //this.loadCoursesFromServer();
     },
     render: function() {
         return (
