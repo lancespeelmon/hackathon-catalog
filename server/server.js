@@ -7,17 +7,17 @@ var serve = require('koa-static');
 var body = require('koa-body');
 var r = require('rethinkdb');
 var Promise = require('bluebird');
-//var rConnect = Promise.promisify(r.connect);
 
 var persistence = require('./persistence.js');
+
+var Utils = require('./utils');
 
 var app = koa();
 app.use(serve('./client'));
 app.use(body());
 app.use(router(app));
-
 app.get('/', function*() {
-    this.body = {message: "hiya"};
+    this.body = {message: "Shouldn't see this!"};
 });
 
 /* TODO: you really wouldn't want to expose this "resource"
@@ -30,22 +30,34 @@ app.get('/bootstrap', function*(next) {
 // TODO: make handler methods gracefully handle exceptions
 // TODO: make responses sensible in error cases e.g. http://www.restapitutorial.com/lessons/httpmethods.html
 // Export a resource for each entity
-['courses'].forEach(function(resourceName) {
+
+var courseServiceConfiguration = {
+    name: "courses"
+};
+
+[courseServiceConfiguration].forEach(function(serviceConfig) {
+
+    var resourceName = serviceConfig.name;
 
     var resourceNameSingular = resourceName.substr(0, resourceName.length-1);
 
     app.get('/' + resourceName + '/', function*(next) {
-        var results = yield persistence.Course.getAll();
-        this.body = results;
-    });
+        var results = null;
 
-    app.post('/' + resourceName + '/', function*(next) {
         var searchParams = {};
         for(var name in this.query) {
-            var value = this.query[name];
-            searchParams[name] = value;
+            searchParams[name] = this.query[name];
         }
-        var results = yield persistence.Course.getSome(searchParams);
+        /*
+         * If params are provided then assume this is a search a pass the params along to the data access layer.
+         * Otherwise, just call DAO getAll()
+         */
+        if (Utils.isEmpty(searchParams)) {
+            results = yield persistence.Course.getAll();
+        } else {
+            results = yield persistence.Course.getSome(searchParams);
+        }
+
         this.body = results;
     });
 
@@ -55,7 +67,7 @@ app.get('/bootstrap', function*(next) {
         } catch (err) {
             this.status = 404;
             this.body = err;
-            return; // yep, early return
+            return;
         }
 
         this.body = results;

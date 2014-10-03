@@ -1,5 +1,4 @@
 var r = require('rethinkdb'),
-    util = require('util'),
     assert = require('assert');
 
 var Promise = require('bluebird')
@@ -31,45 +30,7 @@ var DataAccess = function (t) {
     var table = t
 
     return {
-        "getAll" : function() {
-            return new Promise(function(resolve, reject) {
-                r.table(table).run(connection, function(err, cursor) {
-                    if (err) reject(err);
-                    cursor.toArray(function(err, result) {
-                        if (err) throw err;
-                        resolve(result);
-                    });
-                });
-            });
-        },
-
-        "getSome" : function(searchParams) {
-            return new Promise(function(resolve, reject) {
-                r.table(table).filter(function(doc) {
-
-                    //for (key in searchParams){
-                        //  Need to dynamically build out the request filter here ... somehow ...
-                    //}
-
-                    //  For now just assume we have a code key and use its value
-                    var s = "^" + searchParam['code'];
-                    return doc('code').match(s);
-                }).run(connection,
-                    function(err, cursor) {
-                        if (err) {
-                            console.log("[ERROR][%s][GET courses] %s:%s\n%s", connection['_id'], err.name, err.msg, err.message);
-                        }
-                        else {
-                            cursor.toArray(function (err, result) {
-                                if (err) throw err;
-                                resolve(result);
-                            });
-                        }
-                    });
-            });
-        },
-
-        "get" : function(id) {
+        "get": function(id) {
             return new Promise(function(resolve, reject) {
                 r.table(table).filter(r.row('id').eq(id)).run(connection, function(err, cursor) {
                     if (err) reject(err);
@@ -83,6 +44,43 @@ var DataAccess = function (t) {
                         } else {
                             resolve(result[0]);
                         }
+                    });
+                });
+            });
+        },
+
+        "getSome" : function(searchParams) {
+            return new Promise(function(resolve, reject) {
+                //  Dynamically build a search from query params
+                //  FIXME: This opens a security hole big as Dallas. Should probably limit
+                //  properties that can be included in request params for a particular service/table.
+                var query = r.table(table);
+                for (key in searchParams){
+                    query = query.filter(function(course) {
+                        return course(key).match(searchParams[key]);
+                    });
+                }
+                query = query.orderBy('title'); // ... and furthermore.
+                query.run(connection, function(err, cursor) {
+                    if (err) {
+                        console.log("[ERROR][%s][GET courses] %s:%s\n%s", connection['_id'], err.name, err.msg, err.message);
+                    }
+                    else {
+                        cursor.toArray(function (err, result) {
+                            if (err) throw err;
+                            resolve(result);
+                        });
+                    }
+                }
+            );
+        },
+        "getAll" : function() {
+            return new Promise(function(resolve, reject) {
+                r.table(table).run(connection, function(err, cursor) {
+                    if (err) reject(err);
+                    cursor.toArray(function(err, result) {
+                        if (err) throw err;
+                        resolve(result);
                     });
                 });
             });
