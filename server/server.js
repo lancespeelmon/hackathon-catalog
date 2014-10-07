@@ -20,24 +20,11 @@ app.get('/', function*() {
     this.body = {message: "Shouldn't see this!"};
 });
 
-/* TODO: you really wouldn't want to expose this "resource"
-app.get('/bootstrap', function*(next) {
-    persistence.bootstrap();
-    this.body = "database reset"
-});
-*/
-
 // TODO: make handler methods gracefully handle exceptions
 // TODO: make responses sensible in error cases e.g. http://www.restapitutorial.com/lessons/httpmethods.html
 // Export a resource for each entity
 
-var courseServiceConfiguration = {
-    name: "courses"
-};
-
-[courseServiceConfiguration].forEach(function(serviceConfig) {
-
-    var resourceName = serviceConfig.name;
+['courses'].forEach(function(resourceName) {
 
     var resourceNameSingular = resourceName.substr(0, resourceName.length-1);
 

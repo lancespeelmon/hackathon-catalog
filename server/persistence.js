@@ -1,5 +1,9 @@
+'use strict;'
+
 var r = require('rethinkdb'),
     assert = require('assert');
+
+var util = require('util');
 
 var Promise = require('bluebird')
 
@@ -12,10 +16,12 @@ var dbConfig = {
 };
 
 var onConnect = function onConnect(callback) {
-    r.connect(dbConfig, function (err, connection) {
+
+    util.log("Connecting to database " + dbConfig.host + ":" + dbConfig.port);
+
+    r.connect(dbConfig, function (err, c) {
         assert.ok(err === null, err);
-        connection['_id'] = Math.floor(Math.random() * 10001);
-        callback(err, connection);
+        callback(err, c);
     });
 }
 
@@ -25,14 +31,62 @@ onConnect(function(err, conn) {
 })
 
 /**
- * Boiler plate code for creating boilerplate data access objects.
- * @param t The name of the table.
+ * Clobber and rebuild the database and tables. 
  */
-var DataAccess = function (t) {
+var DBInit = function () {
+    var data = require("../test/data.js");
+    return {
+        "initialize" : function () {
+            r.connect(dbConfig, function(err, conn) {
+                if (err) {
+                    util.log("Could not connection to initialize the database: %s", err.message);
+                    process.exit(1);
+                }
+
+		//  
+		connection = conn;
+
+                util.log("Dropping database " + dbConfig.db);
+
+                r.dbDrop(dbConfig.db).run(conn, function(err) {
+                    if (err) {
+                        console.error("Could not drop the database: %s", err);
+                    }
+                });
+
+                util.log("Creating database " + dbConfig.db);
+                r.dbCreate(dbConfig.db).run(conn, function(err) {
+                    if (err) {
+                        console.error("Could not create database: %s", err);
+                    }
+                });
+
+                util.log("Creating table courses");
+                r.tableCreate("courses").run(conn, function(err) {
+                    if (err) {
+                         console.error("Could not create table: %s", err);
+                    }
+                });
+
+                util.log("Adding course data.");
+
+                data.courses.forEach(function(course) {
+                    exports.Course.create(course);
+                });
+            });
+        }	
+    }
+};
+
+exports.DBInit = DBInit();
+
+/**
+ * Boiler plate code for creating boilerplate data access objects.
+ * @param table The name of the table.
+ */
+var DataAccess = function (table) {
     // TODO: validate object structure for all functions accepting courses as args.  Need a callback for that.
-
-    var table = t
-
+    
     return {
         /**
          * Gets an entity by its id.
@@ -92,7 +146,7 @@ var DataAccess = function (t) {
             });
         },
         /**
-         * Gets a rows in the table.
+         * Gets all rows in the table.
          */
         "getAll": function() {
             return new Promise(function(resolve, reject) {
@@ -105,10 +159,30 @@ var DataAccess = function (t) {
                 });
             });
         },
-        "update": function(course) {
+	/**
+ 	 * Create a new record.
+ 	 */
+	"create": function(entity) {
+            return new Promise(function(resolve, reject) {
+                r.table(table).insert(entity).run(connection, function(err, result) {
+                    if (err) reject(err);
+                    console.log(result);
+                    //  FIXME: This is an add, not an update.
+                    if (result.replaced == 1 || result.unchanged == 1) {
+                        resolve(result);
+                    } else {
+                        reject(result);
+                    }
+                });
+            });
+	},
+        /**
+         * Update an exiting record. 
+         */
+        "update": function(entity) {
             return new Promise(function(resolve, reject) {
                 // what happens if there is no course with the given ID?
-                r.table(table).get(course.id).replace(course).run(connection, function(err, result) {
+                r.table(table).get(entity.id).replace(course).run(connection, function(err, result) {
                     if (err) reject(err);
                     console.log(result);
                     if (result.replaced == 1 || result.unchanged == 1) {
@@ -136,7 +210,7 @@ var DataAccess = function (t) {
                     }
                 });
             });
-        }
+        },
     }
 };
 

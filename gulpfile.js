@@ -48,4 +48,13 @@ gulp.task('watch', function() {
   gulp.watch('client/**/*.jsx', ['webpack'])
 })
 
+/*
+ * Clobber and rebuild the database. !!! This target will clobber your database !!!
+ */
+gulp.task('dbinit', function () {
+    var persistence = require('./server/persistence.js');
+    persistence.DBInit.initialize();
+});
+
+
 gulp.task('default', ['webpack'])
