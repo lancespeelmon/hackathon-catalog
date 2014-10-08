@@ -2,21 +2,9 @@
 
 var React = require('react')
 
-/*
- * The details of a Course.
+/**
+ * Course search form.
  */
-var Course = React.createClass({
-    render: function() {
-        return (
-            <div className="course">
-                <h3 className="courseDetails">
-                    {this.props.title} ({this.props.code})
-                </h3>
-            </div>
-        );
-    }
-});
-
 var CourseSearchForm = React.createClass({
     handleSubmit: function(e) {
         e.preventDefault();
@@ -39,19 +27,47 @@ var CourseSearchForm = React.createClass({
     }
 });
 
-/* A list of Courses */
-var CourseList = React.createClass({
-    render: function() {
-        var courseNodes = this.props.data.map(function(course, index) {
-            return (
-                <Course title={course.title} code={course.code} key={index} />
-            );
+var CourseDataTable = React.createClass({
+    getInitialState: function(){
+        return {data: []}
+    },
+    componentDidMount: function(){
+        var self = this;
+        $('#courseSearchResults').dataTable({
+            //"sPaginationType": "bootstrap",
+            "bAutoWidth": false,
+            "bDestroy": true,
+            "fnDrawCallback": function() {
+                self.forceUpdate();
+            }
+        });
+    },
+    componentDidUpdate: function(){
+        $('#courseSearchResults').dataTable({
+            //"sPaginationType": "bootstrap",
+            "bAutoWidth": false,
+            "bDestroy": true
+        });
+    },
+    render: function(){
+        var course = this.props.data.map(function(c, index){
+            return <tr><td>{c.code}</td><td>{c.title}</td></tr>
         });
         return (
-            <div className="courseList">
-                {courseNodes}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="courseSearchResults">
+                    <thead>
+                        <tr class="success">
+                            <td>Code</td>
+                            <td>Title</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+						{course}
+                    </tbody>
+                </table>
             </div>
-        );
+        )
     }
 });
 
@@ -77,20 +93,17 @@ var CourseBox = React.createClass({
     getInitialState: function() {
         return {data: []};
     },
-    //componentDidMount: function() {
-        // Leaving this because I don't want to forget about it.
-        //this.loadCoursesFromServer();
-    //},
     render: function() {
         return (
             <div className="courseBox">
                 <h2>Courses</h2>
                 <CourseSearchForm onCourseSubmit={this.handleCourseSearch} />
-                <CourseList data={this.state.data} />
+                <CourseDataTable data={this.state.data} />
             </div>
         );
     }
 });
+
 
 var React = require('react')
 

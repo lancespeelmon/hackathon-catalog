@@ -43,8 +43,7 @@ var DBInit = function () {
                     process.exit(1);
                 }
 
-		//  
-		connection = conn;
+		        connection = conn;
 
                 util.log("Dropping database " + dbConfig.db);
 
@@ -158,22 +157,22 @@ var DataAccess = function (table) {
                 });
             });
         },
-	/**
- 	 * Create a new record.
- 	 */
-	"create": function(entity) {
-            return new Promise(function(resolve, reject) {
-                r.table(table).insert(entity).run(connection, function(err, result) {
-                    if (err) reject(err);
-                    console.log(result);
-                    if (result.inserted == 1) {
-                        resolve(result);
-                    } else {
-                        reject(result);
-                    }
+        /**
+         * Create a new record.
+         */
+        "create": function(entity) {
+                return new Promise(function(resolve, reject) {
+                    r.table(table).insert(entity).run(connection, function(err, result) {
+                        if (err) reject(err);
+                        console.log(result);
+                        if (result.inserted == 1) {
+                            resolve(result);
+                        } else {
+                            reject(result);
+                        }
+                    });
                 });
-            });
-	},
+        },
         /**
          * Update an exiting record. 
          */
@@ -208,7 +207,7 @@ var DataAccess = function (table) {
                     }
                 });
             });
-        },
+        }
     }
 };
 
