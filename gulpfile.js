@@ -56,5 +56,4 @@ gulp.task('dbinit', function () {
     persistence.DBInit.initialize();
 });
 
-
 gulp.task('default', ['webpack'])

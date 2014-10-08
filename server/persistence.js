@@ -69,9 +69,8 @@ var DBInit = function () {
                 });
 
                 util.log("Adding course data.");
-
                 data.courses.forEach(function(course) {
-                    exports.Course.create(course);
+                     exports.Course.create(course);
                 });
             });
         }	
@@ -167,8 +166,7 @@ var DataAccess = function (table) {
                 r.table(table).insert(entity).run(connection, function(err, result) {
                     if (err) reject(err);
                     console.log(result);
-                    //  FIXME: This is an add, not an update.
-                    if (result.replaced == 1 || result.unchanged == 1) {
+                    if (result.inserted == 1) {
                         resolve(result);
                     } else {
                         reject(result);
