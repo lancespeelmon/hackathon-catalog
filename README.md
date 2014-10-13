@@ -3,6 +3,7 @@
 - Install Node.js v0.11.14
 - Check out the code
 - npm install
+- npm install -g gulp
 - bower install
 - gulp
 - gulp dbinit
