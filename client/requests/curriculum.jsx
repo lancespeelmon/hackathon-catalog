@@ -27,6 +27,17 @@ var CourseSearchForm = React.createClass({
     }
 });
 
+var CourseDataTableRow = React.createClass({
+    render: function(){
+        return (
+            <tr>
+                 <td>{this.props.course.code}</td>
+                 <td><span title={this.props.course.description}>{this.props.course.title}</span></td>
+            </tr>
+        )
+    }
+});
+
 var CourseDataTable = React.createClass({
     getInitialState: function(){
         return {data: []}
@@ -50,20 +61,20 @@ var CourseDataTable = React.createClass({
         });
     },
     render: function(){
-        var course = this.props.data.map(function(c, index){
-            return <tr><td>{c.code}</td><td>{c.title}</td></tr>
+        var courses = this.props.data.map(function(course, index){
+            return <CourseDataTableRow course={course} key={index} />
         });
         return (
-            <div class="table-responsive">
-                <table class="table table-bordered" id="courseSearchResults">
+            <div className="table-responsive">
+                <table className="tdisplay" id="courseSearchResults">
                     <thead>
-                        <tr class="success">
+                        <tr className="success">
                             <td>Code</td>
                             <td>Title</td>
                         </tr>
                     </thead>
                     <tbody>
-						{course}
+			{courses}
                     </tbody>
                 </table>
             </div>
@@ -94,11 +105,16 @@ var CourseBox = React.createClass({
         return {data: []};
     },
     render: function() {
+        var dataTable = <div>No courses</div>;
+        if (this.state.data.length > 0) {
+            dataTable = <CourseDataTable data={this.state.data} />;
+        }
+
         return (
             <div className="courseBox">
                 <h2>Courses</h2>
                 <CourseSearchForm onCourseSubmit={this.handleCourseSearch} />
-                <CourseDataTable data={this.state.data} />
+                {dataTable}
             </div>
         );
     }
@@ -114,3 +130,4 @@ module.exports = React.createClass({
         );
     }
 });
+
